@@ -37,3 +37,4 @@ services:
 networks:
   web:
     driver: bridge
+    attachable: true
