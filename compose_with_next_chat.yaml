@@ -1,8 +1,7 @@
+version: '3'
 services:
   chatgpt-next-web:
     image: yidadaa/chatgpt-next-web
-    ports:
-      - "3000:3000"
     environment:
       OPENAI_API_KEY: "gptyyds"
       CODE: "587456" # 如果你想要设置页面的访问密码，请修改这里
@@ -12,13 +11,29 @@ services:
       - freegpt35
     networks:
       - web
+    # 移除 ports 设置，允许 nginx-proxy-manager 来管理外部访问
 
   freegpt35:
     image: missuo/freegpt35:latest
     restart: always
-    ports:
-      - "3040:3040"
     networks:
       - web
+    # 保留 3040 端口的设置以便外部访问
+
+  app:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+    networks:
+      - web
+    # nginx-proxy-manager 也被加入到当前的 web 网络
+
 networks:
   web:
+    driver: bridge
